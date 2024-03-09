@@ -1,15 +1,20 @@
+import os
 import sqlite3
+
+from pathlib import Path
 
 from flask import Flask, abort, redirect, g
 
 
 app = Flask(__name__)
+state_home = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local" / "state"))
+db_path = state_home / "durl" / "durl.db"
 
 
 def get_db():
     db = getattr(g, "_database", None)
     if db is None:
-        db = g._database = sqlite3.connect("durl.db")
+        db = g._database = sqlite3.connect(db_path)
     return db
 
 
