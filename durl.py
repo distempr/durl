@@ -1,6 +1,7 @@
 import os
 import sqlite3
 
+from datetime import datetime, UTC
 from pathlib import Path
 
 from flask import Flask, abort, redirect, g
@@ -20,11 +21,16 @@ def get_db():
 
 @app.route("/<uid>")
 def url(uid):
-    cur = get_db().cursor()
+    db = get_db()
+    cur = db.cursor()
     cur.execute("SELECT url FROM url WHERE id = ? AND active = 1", (uid,))
     url = cur.fetchone() 
     if not url:
         abort(404)
+
+    now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S")
+    cur.execute("UPDATE url SET last_hit = ?, hit_count = hit_count + 1 WHERE id = ?", (now, uid))
+    db.commit()
 
     url = url[0]
     return redirect(url)

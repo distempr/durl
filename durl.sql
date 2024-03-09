@@ -2,5 +2,6 @@ CREATE TABLE IF NOT EXISTS url (
   id TEXT PRIMARY KEY,
   url TEXT NOT NULL,
   active INTEGER NOT NULL,
-  last_accessed TEXT
+  last_hit TEXT,
+  hit_count INTEGER DEFAULT 0 NOT NULL
 )
