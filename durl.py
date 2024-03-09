@@ -13,10 +13,10 @@ def get_db():
     return db
 
 
-@app.route("/<surl>")
-def url(surl):
+@app.route("/<uid>")
+def url(uid):
     cur = get_db().cursor()
-    cur.execute("SELECT url FROM url WHERE id = ? AND active = 1", (surl,))
+    cur.execute("SELECT url FROM url WHERE id = ? AND active = 1", (uid,))
     url = cur.fetchone() 
     if not url:
         abort(404)
