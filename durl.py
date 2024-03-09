@@ -33,7 +33,7 @@ def url(uid):
     db.commit()
 
     url = url[0]
-    return redirect(url)
+    return redirect(url, code=302)
 
 
 @app.teardown_appcontext
