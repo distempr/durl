@@ -10,6 +10,7 @@ from pathlib import Path
 from secrets import token_urlsafe
 
 
+# TODO make initial length configurable
 TOKEN_INITIAL_LENGTH = 1
 TOKEN_RETRIES = 64
 
@@ -24,16 +25,12 @@ subparsers = parser.add_subparsers(required=True, dest="command")
 
 parser_add = subparsers.add_parser("add")
 parser_add.add_argument("uid", nargs="?")
-parser_add.add_argument("-e", "--encode", action="store_true")
+#parser_add.add_argument("-e", "--encode", action="store_true")
 
 args = parser.parse_args()
 
 match args.command:
     case "add":
-        # TODO
-        # get link from stdin
-        # check encode
-
         cur = con.cursor()
         if args.uid:
             if not re.match("^[a-zA-Z0-9_-]+$", args.uid):
@@ -41,20 +38,32 @@ match args.command:
                 sys.exit(1)
 
             try:
-                cur.execute("INSERT INTO url (id, url) VALUES (?, ?)", (args.uid, "https://example.com"))
+                url = input()
+            except EOFError:
+                print("No URL supplied")
+                sys.exit(1)
+
+            try:
+                cur.execute("INSERT INTO url (id, url) VALUES (?, ?)", (args.uid, url))
             except sqlite3.IntegrityError:
                 print(f"Unable to add URL with supplied ID, please use another one")
                 sys.exit(1)
             else:
                 con.commit()
         else:
+            try:
+                url = input()
+            except EOFError:
+                print("No URL supplied")
+                sys.exit(1)
+
             retries = 0
             length = TOKEN_INITIAL_LENGTH
             success = False
             while not success:
                 uid = token_urlsafe(length)
                 try:
-                    cur.execute("INSERT INTO url (id, url) VALUES (?, ?)", (uid, "https://example.com"))
+                    cur.execute("INSERT INTO url (id, url) VALUES (?, ?)", (uid, url))
                 except sqlite3.IntegrityError:
                     if retries >= TOKEN_RETRIES:
                         length += 1
@@ -66,7 +75,6 @@ match args.command:
                 else:
                     con.commit()
                     success = True
-
             print(f"Generated URL ID: {uid} (length {length} retries {retries})")
     case "list":
         pass
