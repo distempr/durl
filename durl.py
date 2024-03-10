@@ -36,6 +36,13 @@ def url(uid):
     return redirect(url, code=302)
 
 
+@app.route("/api/status")
+def status():
+    db = get_db()
+    cur = db.cursor()
+    return ("", 204)
+
+
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, "_database", None)
