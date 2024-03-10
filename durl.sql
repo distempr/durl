@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS url (
   id TEXT PRIMARY KEY,
   url TEXT NOT NULL,
-  active INTEGER NOT NULL,
+  active INTEGER DEFAULT 1 NOT NULL,
   last_hit TEXT,
   hit_count INTEGER DEFAULT 0 NOT NULL
-)
+);
+
+CREATE INDEX IF NOT EXISTS url_active ON url (active);

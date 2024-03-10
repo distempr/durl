@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import re
+import sqlite3
+import sys
+
+from pathlib import Path
+from secrets import token_urlsafe
+
+
+TOKEN_INITIAL_LENGTH = 1
+TOKEN_RETRIES = 64
+
+state_home = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local" / "state"))
+db_path = state_home / "durl" / "durl.db"
+
+
+con = sqlite3.connect(db_path)
+
+parser = argparse.ArgumentParser(prog="durl")
+subparsers = parser.add_subparsers(required=True, dest="command")
+
+parser_add = subparsers.add_parser("add")
+parser_add.add_argument("uid", nargs="?")
+parser_add.add_argument("-e", "--encode", action="store_true")
+
+args = parser.parse_args()
+
+match args.command:
+    case "add":
+        # TODO
+        # get link from stdin
+        # check encode
+
+        cur = con.cursor()
+        if args.uid:
+            if not re.match("^[a-zA-Z0-9_-]+$", args.uid):
+                print(f"URL ID needs to contain only the characters [a-Z0-9_-]")
+                sys.exit(1)
+
+            try:
+                cur.execute("INSERT INTO url (id, url) VALUES (?, ?)", (args.uid, "https://example.com"))
+            except sqlite3.IntegrityError:
+                print(f"Unable to add URL with supplied ID, please use another one")
+                sys.exit(1)
+            else:
+                con.commit()
+        else:
+            retries = 0
+            length = TOKEN_INITIAL_LENGTH
+            success = False
+            while not success:
+                uid = token_urlsafe(length)
+                try:
+                    cur.execute("INSERT INTO url (id, url) VALUES (?, ?)", (uid, "https://example.com"))
+                except sqlite3.IntegrityError:
+                    if retries >= TOKEN_RETRIES:
+                        length += 1
+                        retries = 0
+                        continue
+
+                    retries += 1
+                    continue
+                else:
+                    con.commit()
+                    success = True
+
+            print(f"Generated URL ID: {uid} (length {length} retries {retries})")
+    case "list":
+        pass
+    case "archive":
+        # warn if accessed recently (one year?)
+        # add a flag to auto archive all old links?
+        pass
+    case "delete":
+        # check if archived FIRST
+        pass
+
+con.close()
