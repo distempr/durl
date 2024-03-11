@@ -5,21 +5,25 @@ import os
 import re
 import sqlite3
 import sys
-#import tomllib
+import tomllib
 
 from pathlib import Path
 from secrets import token_urlsafe
 
 
-# TODO make initial length configurable
 TOKEN_INITIAL_LENGTH = 1
 TOKEN_RETRIES = 64
 
-#config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
 state_home = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local" / "state"))
-#config_path = config_home / "durl.toml"
+config_path = config_home / "durl.toml"
 db_path = state_home / "durl" / "durl.db"
 
+
+with config_path.open("rb") as f:
+    config = tomllib.load(f)
+
+token_initial_length = config.get("token_initial_length", TOKEN_INITIAL_LENGTH)
 
 con = sqlite3.connect(db_path)
 
@@ -61,7 +65,7 @@ match args.command:
                 sys.exit(1)
 
             retries = 0
-            length = TOKEN_INITIAL_LENGTH
+            length = token_initial_length
             success = False
             while not success:
                 uid = token_urlsafe(length)
