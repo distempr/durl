@@ -5,6 +5,7 @@ import os
 import re
 import sqlite3
 import sys
+#import tomllib
 
 from pathlib import Path
 from secrets import token_urlsafe
@@ -14,7 +15,9 @@ from secrets import token_urlsafe
 TOKEN_INITIAL_LENGTH = 1
 TOKEN_RETRIES = 64
 
+#config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
 state_home = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local" / "state"))
+#config_path = config_home / "durl.toml"
 db_path = state_home / "durl" / "durl.db"
 
 
