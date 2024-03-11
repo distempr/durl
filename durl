@@ -37,7 +37,7 @@ match args.command:
         cur = con.cursor()
         if args.uid:
             if not re.match("^[a-zA-Z0-9_-]+$", args.uid):
-                print(f"URL ID needs to contain only the characters [a-Z0-9_-]")
+                print("URL ID needs to contain only the characters [a-Z0-9_-]")
                 sys.exit(1)
 
             try:
@@ -49,7 +49,7 @@ match args.command:
             try:
                 cur.execute("INSERT INTO url (id, url) VALUES (?, ?)", (args.uid, url))
             except sqlite3.IntegrityError:
-                print(f"Unable to add URL with supplied ID, please use another one")
+                print("Unable to add URL with supplied ID, please use another one")
                 sys.exit(1)
             else:
                 con.commit()
