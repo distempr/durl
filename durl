@@ -24,6 +24,7 @@ with config_path.open("rb") as f:
     config = tomllib.load(f)
 
 token_initial_length = config.get("token_initial_length", TOKEN_INITIAL_LENGTH)
+token_retries = config.get("token_retries", TOKEN_RETRIES)
 
 con = sqlite3.connect(db_path)
 
@@ -72,7 +73,7 @@ match args.command:
                 try:
                     cur.execute("INSERT INTO url (id, url) VALUES (?, ?)", (uid, url))
                 except sqlite3.IntegrityError:
-                    if retries >= TOKEN_RETRIES:
+                    if retries >= token_retries:
                         length += 1
                         retries = 0
                         continue
@@ -84,6 +85,16 @@ match args.command:
                     success = True
             print(f"Generated URL ID: {uid} (length {length} retries {retries})")
     case "list":
+        #def truncate_string(input_string, length):
+        #    if len(input_string) > (2*length + 3):
+        #        return input_string[:length] + '...' + input_string[-length:]
+        #    return input_string
+        pass
+    case "get":
+        # get the URL by UID
+        pass
+    case "update":
+        # update URL for a UID, add option to reset hit count and last accessed
         pass
     case "archive":
         # warn if accessed recently (one year?)
