@@ -23,8 +23,8 @@ def get_db():
 def url(uid):
     db = get_db()
     cur = db.cursor()
-    cur.execute("SELECT url FROM url WHERE id = ? AND active = 1", (uid,))
-    url = cur.fetchone() 
+    cur.execute("SELECT url FROM url WHERE id = ? AND archived = 0", (uid,))
+    url = cur.fetchone()
     if not url:
         abort(404)
 
@@ -40,6 +40,7 @@ def url(uid):
 def status():
     db = get_db()
     cur = db.cursor()
+    cur.execute("PRAGMA user_version")
     return ("", 204)
 
 
