@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import json
 import os
 import re
 import sqlite3
@@ -34,6 +35,9 @@ subparsers = parser.add_subparsers(required=True, dest="command")
 parser_add = subparsers.add_parser("add")
 parser_add.add_argument("uid", nargs="?")
 #parser_add.add_argument("-e", "--encode", action="store_true")
+
+parser_get = subparsers.add_parser("get")
+parser_get.add_argument("uid")
 
 args = parser.parse_args()
 
@@ -83,7 +87,8 @@ match args.command:
                 else:
                     con.commit()
                     success = True
-            print(f"Generated URL ID: {uid} (length {length} retries {retries})")
+
+            print(f"Generated URL ID: {uid} (retries {retries})")
     case "list":
         #def truncate_string(input_string, length):
         #    if len(input_string) > (2*length + 3):
@@ -91,8 +96,19 @@ match args.command:
         #    return input_string
         pass
     case "get":
-        # get the URL by UID
-        pass
+        cur = con.cursor()
+        cur.execute("SELECT url, last_hit, hit_count FROM url WHERE id = ? AND archived = 0", (args.uid,))
+        url = cur.fetchone()
+        if url is not None:
+            print(json.dumps({
+                "id": args.uid,
+                "url": url[0],
+                "last_hit": url[1],
+                "hit_count": url[2]
+            }, indent=4))
+        else:
+            print("No active URL found with that UID")
+            sys.exit(1)
     case "update":
         # update URL for a UID, add option to reset hit count and last accessed
         pass
