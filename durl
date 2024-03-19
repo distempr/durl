@@ -21,6 +21,15 @@ config_path = config_home / "durl.toml"
 db_path = state_home / "durl" / "durl.db"
 
 
+def list_url(url):
+    line = url["id"] + "\t"
+    line += f"{url['url']:64.64}[..]\t"
+    line += url["last_hit"] + "\t"
+    line += str(url["hit_count"])
+
+    return line
+
+
 with config_path.open("rb") as f:
     config = tomllib.load(f)
 
@@ -38,6 +47,8 @@ parser_add.add_argument("uid", nargs="?")
 
 parser_get = subparsers.add_parser("get")
 parser_get.add_argument("uid")
+
+parser_list = subparsers.add_parser("list")
 
 args = parser.parse_args()
 
@@ -94,7 +105,15 @@ match args.command:
         #    if len(input_string) > (2*length + 3):
         #        return input_string[:length] + '...' + input_string[-length:]
         #    return input_string
-        pass
+        cur = con.cursor()
+        cur.execute("SELECT id, url, last_hit, hit_count FROM url WHERE archived = 0 ORDER BY last_hit DESC")
+        for row in cur:
+            print(list_url({
+                "id": row[0],
+                "url": row[1],
+                "last_hit": row[2],
+                "hit_count": row[3]
+            }))
     case "get":
         cur = con.cursor()
         cur.execute("SELECT url, last_hit, hit_count FROM url WHERE id = ? AND archived = 0", (args.uid,))
