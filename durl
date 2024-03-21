@@ -24,7 +24,7 @@ db_path = state_home / "durl" / "durl.db"
 def list_url(url):
     line = url["id"] + "\t"
     line += f"{url['url']:64.64}[..]\t"
-    line += url["last_hit"] + "\t"
+    line += (url["last_hit"] or "Never") + "\t"
     line += str(url["hit_count"])
 
     return line
@@ -50,6 +50,10 @@ parser_get.add_argument("uid")
 
 parser_list = subparsers.add_parser("list")
 
+parser_update = subparsers.add_parser("update")
+parser_update.add_argument("uid")
+parser_update.add_argument("-r", "--reset", action="store_true")
+
 args = parser.parse_args()
 
 match args.command:
@@ -62,7 +66,7 @@ match args.command:
 
             try:
                 url = input()
-            except EOFError:
+            except (EOFError, KeyboardInterrupt):
                 print("No URL supplied")
                 sys.exit(1)
 
@@ -76,7 +80,7 @@ match args.command:
         else:
             try:
                 url = input()
-            except EOFError:
+            except (EOFError, KeyboardInterrupt):
                 print("No URL supplied")
                 sys.exit(1)
 
@@ -129,8 +133,20 @@ match args.command:
             print("No active URL found with that UID")
             sys.exit(1)
     case "update":
-        # update URL for a UID, add option to reset hit count and last accessed
-        pass
+        cur = con.cursor()
+
+        try:
+            url = input()
+        except (EOFError, KeyboardInterrupt):
+            print("No URL supplied")
+            sys.exit(1)
+
+        cur.execute("UPDATE url SET url = ? WHERE id = ?", (url, args.uid))
+
+        if args.reset:
+            cur.execute("UPDATE url SET last_hit = NULL, hit_count = 0 WHERE id = ?", (args.uid,))
+
+        con.commit()
     case "archive":
         # warn if accessed recently (one year?)
         # add a flag to auto archive all old links?
