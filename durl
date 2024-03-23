@@ -98,12 +98,10 @@ match args.command:
         cur.execute("SELECT url, last_hit, hit_count FROM url WHERE id = ? AND archived = 0", (args.uid,))
         url = cur.fetchone()
         if url is not None:
-            print(json.dumps({
-                "id": args.uid,
-                "url": url[0],
-                "last_hit": url[1],
-                "hit_count": url[2]
-            }, indent=4))
+            print(f"ID: {args.uid}")
+            print(f"Last hit: {url[1] or 'Never'}")
+            print(f"Hit count: {url[2]}")
+            print(f"\n{url[0]}")
         else:
             print("No active URL found with that UID")
             sys.exit(1)
