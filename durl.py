@@ -29,7 +29,7 @@ def url(uid):
     if not url:
         abort(404)
 
-    now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S")
+    now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
     cur.execute("UPDATE url SET last_hit = ?, hit_count = hit_count + 1 WHERE id = ?", (now, uid))
     db.commit()
 
