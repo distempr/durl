@@ -154,12 +154,5 @@ match args.command:
             cur.execute("UPDATE url SET last_hit = NULL, hit_count = 0 WHERE id = ?", (args.uid,))
 
         con.commit()
-    case "archive":
-        # warn if accessed recently (one year?)
-        # add a flag to auto archive all old links?
-        pass
-    case "delete":
-        # check if archived FIRST
-        pass
 
 con.close()
