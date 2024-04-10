@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime, UTC
 from pathlib import Path
 
-from flask import Flask, abort, redirect, g
+from flask import Flask, abort, redirect, g, request
 
 
 app = Flask(__name__)
@@ -43,6 +43,11 @@ def status():
     cur = db.cursor()
     cur.execute("PRAGMA user_version")
     return ("", 204)
+
+
+@app.route("/api/ip")
+def ip():
+    return f"{request.access_route[0]}\n"
 
 
 @app.teardown_appcontext
