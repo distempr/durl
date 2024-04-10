@@ -1,3 +1,4 @@
+import ipaddress
 import os
 import sqlite3
 
@@ -47,7 +48,14 @@ def status():
 
 @app.route("/api/ip")
 def ip():
-    return f"{request.access_route[0]}\n"
+    for ip in request.access_route:
+        try:
+            if ipaddress.ip_address(ip).is_global:
+                return f"{ip}\n"
+        except ValueError:
+            continue
+
+    return ("", 204)
 
 
 @app.teardown_appcontext
