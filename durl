@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import os
@@ -34,7 +34,6 @@ subparsers = parser.add_subparsers(required=True, dest="command")
 
 parser_add = subparsers.add_parser("add")
 parser_add.add_argument("uid", nargs="?")
-#parser_add.add_argument("-e", "--encode", action="store_true")
 parser_add.add_argument("-d", "--description")
 parser_add.add_argument("-e", "--expire-days", type=int)
 parser_add.add_argument("--expire-hours", type=int)
