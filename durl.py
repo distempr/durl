@@ -5,7 +5,7 @@ import sqlite3
 from datetime import datetime, UTC
 from pathlib import Path
 
-from flask import Flask, abort, redirect, g, request
+from flask import Flask, abort, redirect, g, request, make_response
 
 
 app = Flask(__name__)
@@ -43,19 +43,26 @@ def status():
     db = get_db()
     cur = db.cursor()
     cur.execute("PRAGMA user_version")
+
     return ("", 204)
 
 
 @app.route("/api/ip")
 def ip():
+    text = ""
     for ip in request.access_route:
         try:
             if ipaddress.ip_address(ip).is_global:
-                return f"{ip}\n"
+                text = f"{ip}\n"
         except ValueError:
             continue
 
-    return ("", 204)
+    response = make_response(text)
+    response.mimetype = "text/plain"
+    if not text:
+        response.status = 204
+
+    return response
 
 
 @app.teardown_appcontext
